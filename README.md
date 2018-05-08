@@ -9,3 +9,10 @@ MADNS works by running a local DNS server on every machine.. When on the corpora
 
 MADNS takes each DNS request, checks to see if the answer is cached, and if not makes a HTTPS request to a public endpoint.. These request is authenticated with a user certificate that the endpoint checks to see if it is valid or not.. If the certificate is valid the MADNS endpoint can be configured to use an existing DNS server, or can be setup to manage DNS blackholes via a web GUI.
 
+# Features
+
+## Logging:
+Because each user has their own certificate we can track what users, not just IPs made DNS requests
+
+## ACLs:
+You can exempt user from getting a blackhole IP for IR or approved users on the network
