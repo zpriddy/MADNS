@@ -16,3 +16,6 @@ Because each user has their own certificate we can track what users, not just IP
 
 ## ACLs:
 You can exempt user from getting a blackhole IP for IR or approved users on the network
+
+## Whitelist:
+To make DNS requests faster, you can build a whitelist of domains that will use the standard DNS server and bypass MADNS, this can be used for trusted domains like *.google.com etc.
