@@ -12,11 +12,20 @@ import traceback
 import socketserver
 import requests
 from dnslib import *
+from dns import resolver
 
 
 class DomainName(str):
     def __getattr__(self, item):
         return DomainName(item + '.' + self)
+
+def DNSOverride(domain, queryType):
+    r = resolver.Resolver()
+    r.nameservers = ['8.8.8.8','8.8.4.4']
+    a = r.query(domain, queryType)
+    return a
+
+
 
 
 D = DomainName('z.com')
@@ -65,8 +74,12 @@ def dns_response(data):
         reply.add_answer(RR(rname=DomainName(qn[:-1]), rtype=1, rclass=1, ttl=600, rdata=A('216.58.194.206')))
         return reply.pack()
 
+    # TODO: If the domain is whitelisted then use DNSOverride
+    a = DNSOverride(qn[:-1],qt)
+    print(a.name)
+
     answer = requests.get('http://localhost:5000/dns/%s/%s' % (qn[:-1], qt)).json()
-    print(answer)
+
 
     ttl = answer.get('Answer')[0].get('TTL')
     #ip = answer.get('Answer')[0].get('data')
