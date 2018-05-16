@@ -3,3 +3,4 @@ flask
 tldextract
 bcrypt
 flask-security
+flask-mongoengine

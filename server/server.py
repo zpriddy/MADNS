@@ -1,7 +1,6 @@
 import requests
 import tldextract
-from flask import Flask, jsonify, render_template
-from flask_mongoengine import MongoEngine
+from flask import Flask, jsonify, render_template, redirect
 from flask_security import MongoEngineUserDatastore, RoleMixin, Security, UserMixin, login_required
 from pymongo import MongoClient
 
@@ -80,6 +79,14 @@ def manage_sinkhole():
   sinkholed_domains = sinkhole_datastore.find()
   return render_template('manage_sinkhole.html', sinkholed_domains=sinkholed_domains)
 
+@app.route('/add_sinkhole/<domain>')
+@login_required
+def manage_sinkhole(domain=None):
+  if domain is None:
+    return 'No domain provided'
+  sinkhole_datastore.insert({'domain':domain,'rules':['*']})
+  return redirect('/manage_sinkhole')
+
 
 @app.route('/dns/<domain>/<requestType>')
 def dns_lookup(domain=None, requestType=None):
@@ -127,4 +134,4 @@ def checkSinkhole(domain):
 
 
 if __name__ == '__main__':
-  app.run()
+  app.run(host='0.0.0.0')

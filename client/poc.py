@@ -91,6 +91,7 @@ def dns_response(data):
     #    return reply.pack()
 
     # TODO: If the domain is whitelisted then use DNSOverride
+    '''
     if checkWitelist(qn[:-1]):
         a = DNSOverride(qn[:-1],qt)
         print(a.name)
@@ -107,8 +108,9 @@ def dns_response(data):
         #print(dict(a))
         reply.add_answer(RR(rname=DomainName(a.name), rtype=a.rdtype, rclass=a.rdclass, ttl=a.ttl, rdata=A(str(a.to_rdataset()[0]))))
         return reply.pack()
+    '''
 
-    answer = requests.get('http://localhost:5000/dns/%s/%s' % (qn[:-1], qt)).json()
+    answer = requests.get('http://35.233.249.53:5000/dns/%s/%s' % (qn[:-1], qt)).json()
 
 
     #ttl = answer.get('Answer')[0].get('TTL')
