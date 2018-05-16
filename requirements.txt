@@ -1,0 +1,5 @@
+pymongo
+flask
+tldextract
+bcrypt
+flask-security
