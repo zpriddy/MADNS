@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Sinlhole</title>
+</head>
+<body>
+<h1>Manage Sinkhole</h1>
+    {% for d in sinkholed_domains %}
+        Domain: {{d['domain']}} Rules: {{d['rules']}}
+    {% endfor %}
+</body>
+</html>

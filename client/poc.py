@@ -13,7 +13,13 @@ import socketserver
 import requests
 from dnslib import *
 from dns import resolver
+from pymongo import MongoClient
+import tldextract
 
+
+client = MongoClient()
+db = client.madns
+collection = db.whitelist
 
 class DomainName(str):
     def __getattr__(self, item):
@@ -24,6 +30,16 @@ def DNSOverride(domain, queryType):
     r.nameservers = ['8.8.8.8','8.8.4.4']
     a = r.query(domain, queryType)
     return a
+
+def checkWitelist(domain):
+    print('Looking for domain: %s' % domain)
+    ed = tldextract.extract(domain)
+    rootDomain = "{}.{}".format(ed.domain, ed.suffix)
+    d = collection.find_one({"domain": rootDomain})
+    if d is not None:
+        if "*" in d.get('rules') or ed.subdomain in d.get('rules'):
+            return True
+    return False
 
 
 
@@ -70,18 +86,32 @@ def dns_response(data):
     #print(D)
     #print(qn == D)
 
-    if qn == 'dns.google.com.':
-        reply.add_answer(RR(rname=DomainName(qn[:-1]), rtype=1, rclass=1, ttl=600, rdata=A('216.58.194.206')))
-        return reply.pack()
+    #if qn == 'dns.google.com.':
+    #    reply.add_answer(RR(rname=DomainName(qn[:-1]), rtype=1, rclass=1, ttl=600, rdata=A('216.58.194.206')))
+    #    return reply.pack()
 
     # TODO: If the domain is whitelisted then use DNSOverride
-    a = DNSOverride(qn[:-1],qt)
-    print(a.name)
+    if checkWitelist(qn[:-1]):
+        a = DNSOverride(qn[:-1],qt)
+        print(a.name)
+        print((a.response.answer))
+        print('---------')
+        print(a.response.payload)
+        print('----------')
+        a = a.response.answer[0]
+        print(a.to_rdataset()[0])
+        print('**********')
+        print(type(a.to_rdataset()))
+        print(type(reply))
+        #reply.add_answer(RR(a))
+        #print(dict(a))
+        reply.add_answer(RR(rname=DomainName(a.name), rtype=a.rdtype, rclass=a.rdclass, ttl=a.ttl, rdata=A(str(a.to_rdataset()[0]))))
+        return reply.pack()
 
     answer = requests.get('http://localhost:5000/dns/%s/%s' % (qn[:-1], qt)).json()
 
 
-    ttl = answer.get('Answer')[0].get('TTL')
+    #ttl = answer.get('Answer')[0].get('TTL')
     #ip = answer.get('Answer')[0].get('data')
     #t = answer.get('Answer')[0].get('type')
 
@@ -93,8 +123,8 @@ def dns_response(data):
             ttl = answer.get('Answer')[0].get('TTL')
             reply.add_answer(RR(rname=DomainName(qn[:-1]), rtype=t, rclass=1, ttl=ttl, rdata=A(d)))
         if QTYPE[t] == 'AAAA':
-            ttl = answer.get('Answer')[0].get('TTL')
-            reply.add_answer(RR(rname=DomainName(qn[:-1]), rtype=t, rclass=1, ttl=ttl, rdata=AAAA(d)))
+            #ttl = answer.get('Answer')[0].get('TTL')
+            reply.add_answer(RR(rname=DomainName(qn[:-1]), rtype=t, rclass=1, ttl=300, rdata=AAAA(d)))
         if QTYPE[t] == 'CNAME':
             ttl = answer.get('Answer')[0].get('TTL')
             reply.add_answer(RR(rname=DomainName(qn[:-1]), rtype=t, rclass=1, ttl=ttl, rdata=CNAME(d)))
