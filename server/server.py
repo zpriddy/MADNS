@@ -3,7 +3,7 @@ import tldextract
 from flask import Flask, jsonify, render_template, redirect
 from flask_security import MongoEngineUserDatastore, RoleMixin, Security, UserMixin, login_required
 from pymongo import MongoClient
-from flask_mongoengine import MongoEngine 
+from flask_mongoengine import MongoEngine
 
 
 googleDNSUrl = 'https://dns.google.com/resolve?name=%s&type=%s'
@@ -83,7 +83,7 @@ def manage_sinkhole():
 
 @app.route('/add_sinkhole/<domain>')
 @login_required
-def manage_sinkhole(domain=None):
+def add_sinkhole(domain=None):
   if domain is None:
     return 'No domain provided'
   sinkhole_datastore.insert({'domain':domain,'rules':['*']})
